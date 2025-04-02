@@ -57,6 +57,8 @@ app.get("/todos/:id", async (c) => {
     todo,
   })
 
+  sendTodosToAllConnections()
+
   return c.html(detail)
 })
 
@@ -74,6 +76,8 @@ app.post("/todos/:id", async (c) => {
     .set({ title: form.get("title") })
     .where(eq(todosTable.id, id))
 
+  sendTodosToAllConnections()
+
   return c.redirect(c.req.header("Referer"))
 })
 
@@ -90,6 +94,8 @@ app.post("/todos/:id/rename", async (c) => {
     .update(todosTable)
     .set({ title: newTitle, priority: newPriority })
     .where(eq(todosTable.id, id))
+
+  sendTodosToAllConnections()
 
   return c.redirect(`/todos/${id}`)
 })
@@ -178,6 +184,13 @@ const sendTodosToAllConnections = async () => {
     todos,
   })
   for (const connection of connections.values()) {
-    connection.send(rendered)
+    const data = JSON.stringify([
+      {
+        type: "todos",
+        data: rendered,
+      },
+    ])
+
+    connection.send(data)
   }
 }
