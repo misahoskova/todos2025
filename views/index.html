@@ -19,51 +19,7 @@
           <%= title.toUpperCase() %>
         </h1>
 
-        <div class="box">
-          <ul>
-            <% for (const todo of todos) { %>
-            <li class="mb-3">
-              <div class="level">
-                <div class="level-left">
-                  <strong>
-                    <a href="/todos/<%= todo.id %>"
-                      ><%= todo.title %></a
-                    >
-                  </strong>
-                  <span
-                    class="tag ml-2 <%= todo.priority === 'hoří ti koudel' ? 'is-danger' : todo.priority === 'spinkej' ? 'is-info' : 'is-warning' %>"
-                  >
-                    <%= todo.priority %>
-                  </span>
-                </div>
-                <div class="level-right">
-                  <% if (todo.done) { %>
-                  <a
-                    class="button is-success is-light is-small mr-2"
-                    href="/todos/<%= todo.id %>/toggle"
-                  >
-                    Dokončeno
-                  </a>
-                  <a
-                    class="button is-danger is-light is-small"
-                    href="/todos/<%= todo.id %>/remove"
-                  >
-                    Odebrat
-                  </a>
-                  <% } else { %>
-                  <a
-                    class="button is-warning is-light is-small"
-                    href="/todos/<%= todo.id %>/toggle"
-                  >
-                    Nedokončeno
-                  </a>
-                  <% } %>
-                </div>
-              </div>
-            </li>
-            <% } %>
-          </ul>
-        </div>
+        <div id="todos"><% - include('_todos.html') %></div>
 
         <form method="post" action="/todos">
           <div class="field has-addons">
@@ -100,5 +56,14 @@
         </form>
       </div>
     </section>
+
+    <script>
+      const ws = new WebSocket("ws://localhost:3000/ws")
+      ws.addEventListener("message", (evt) => {
+        const el = document.getElementById("todos")
+
+        el.innerHTML = evt.data
+      })
+    </script>
   </body>
 </html>

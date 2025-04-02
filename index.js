@@ -6,6 +6,8 @@ import { renderFile } from "ejs"
 import { drizzle } from "drizzle-orm/libsql"
 import { todosTable } from "./src/schema.js"
 import { eq } from "drizzle-orm"
+import { createNodeWebSocket } from "@hono/node-ws"
+import { WSContext } from "hono/ws"
 
 const db = drizzle({
   connection: "file:db.sqlite",
@@ -13,6 +15,9 @@ const db = drizzle({
 })
 
 const app = new Hono()
+
+const { injectWebSocket, upgradeWebSocket } =
+  createNodeWebSocket({ app })
 
 app.use(logger())
 app.use(serveStatic({ root: "public" }))
@@ -101,6 +106,12 @@ app.get("/todos/:id/toggle", async (c) => {
     .set({ done: !todo.done })
     .where(eq(todosTable.id, id))
 
+  for (const connection of connections.values()) {
+    connection.send("updated")
+  }
+
+  sendTodosToAllConnections()
+
   return c.redirect(c.req.header("Referer"))
 })
 
@@ -116,11 +127,37 @@ app.get("/todos/:id/remove", async (c) => {
   return c.redirect("/")
 })
 
-serve(app, (info) => {
+/** @type{Set<WSContext<WebSocket>>} */
+const connection = new Set()
+
+app.get(
+  "/ws",
+  upgradeWebSocket((c) => {
+    console.log(c.req.path)
+
+    return {
+      onOpen: (evt, ws) => {
+        connections.add(ws)
+        connection = ws.send("Hello from server")
+      },
+      onClose: (evt, ws) => {
+        connection.delete(ws)
+        console.log("close")
+      },
+      onMessage: (evt, ws) => {
+        console.log("onMessage", evt.data)
+      },
+    }
+  })
+)
+
+const server = serve(app, (info) => {
   console.log(
     `App started on http://localhost:${info.port}`
   )
 })
+
+injectWebSocket(server)
 
 const getTodoById = async (id) => {
   const todo = await db
@@ -130,4 +167,15 @@ const getTodoById = async (id) => {
     .get()
 
   return todo
+}
+
+const sendTodosToAllConnections = async () => {
+  const todos = await db.select().from(todosTable).all()
+
+  const rendered = await renderFile("views/todos.html", {
+    todos,
+  })
+  for (const connection of connections.values()) {
+    connection.send(rendered)
+  }
 }
