@@ -124,6 +124,8 @@ app.get("/todos/:id/remove", async (c) => {
 
   await db.delete(todosTable).where(eq(todosTable.id, id))
 
+  sendTodosToAllConnections()
+
   return c.redirect("/")
 })
 
