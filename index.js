@@ -21,7 +21,7 @@ app.get("/", async (c) => {
   const todos = await db.select().from(todosTable).all()
 
   const index = await renderFile("views/index.html", {
-    title: "My todo app",
+    title: "ÚKOLNÍČEK",
     todos,
   })
 
@@ -30,10 +30,13 @@ app.get("/", async (c) => {
 
 app.post("/todos", async (c) => {
   const form = await c.req.formData()
+  const title = form.get("title")
+  const priority = form.get("priority") || "normal"
 
   await db.insert(todosTable).values({
-    title: form.get("title"),
+    title,
     done: false,
+    priority,
   })
 
   return c.redirect("/")
@@ -41,7 +44,6 @@ app.post("/todos", async (c) => {
 
 app.get("/todos/:id", async (c) => {
   const id = Number(c.req.param("id"))
-
   const todo = await getTodoById(id)
 
   if (!todo) return c.notFound()
@@ -68,6 +70,23 @@ app.post("/todos/:id", async (c) => {
     .where(eq(todosTable.id, id))
 
   return c.redirect(c.req.header("Referer"))
+})
+
+app.post("/todos/:id/rename", async (c) => {
+  const id = Number(c.req.param("id"))
+  const form = await c.req.formData()
+  const newTitle = form.get("title")
+  const newPriority = form.get("priority")
+
+  const todo = await getTodoById(id)
+  if (!todo) return c.notFound()
+
+  await db
+    .update(todosTable)
+    .set({ title: newTitle, priority: newPriority })
+    .where(eq(todosTable.id, id))
+
+  return c.redirect(`/todos/${id}`)
 })
 
 app.get("/todos/:id/toggle", async (c) => {

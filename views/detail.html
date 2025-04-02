@@ -1,30 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Document</title>
+    <title>Detail úkolu</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
   </head>
   <body>
-    <a href="/">Todočka</a>
-    <hr />
-    <h1><%= todo.title %></h1>
-    <hr />
-    <% if (todo.done) { %>
-    <a href="/todos/<%= todo.id %>/toggle">dokončeno</a>
-    <a href="/todos/<%= todo.id %>/remove">odebrat</a>
-    <% } else { %>
-    <a href="/todos/<%= todo.id %>/toggle"> nedokončeno </a>
-    <% } %>
-    <hr />
-    <h2>Upravit todočko</h2>
-    <form action="/todos/<%= todo.id %>" method="post">
-      <label>Titulek</label>
-      <input name="title" value="<%= todo.title %>" />
-      <button type="submit">Uložit</button>
-    </form>
+    <section class="section">
+      <div class="container">
+        <h1 class="title has-text-centered">
+          DETAIL ÚKOLU
+        </h1>
+
+        <div class="box">
+          <h2 class="subtitle">
+            &#x1F5D2 <%= todo.title %>
+          </h2>
+
+          <p class="mb-4">
+            Stav: <% if (todo.done) { %>
+            <span class="tag is-success">Dokončeno</span>
+            <% } else { %>
+            <span class="tag is-warning">Nedokončeno</span>
+            <% } %>
+          </p>
+
+          <p class="mb-4">
+            Priorita:
+            <span class="tag 
+              <%= todo.priority === 'hoří ti koudel' ? 'is-danger' :
+                  todo.priority === 'spinkej' ? 'is-info' : 'is-warning' %>">
+              <%= todo.priority %>
+            </span>
+          </p>
+
+          <div class="buttons">
+            <a class="button is-link is-light" href="/todos/<%= todo.id %>/toggle?from=detail">Změnit stav</a>
+            <a
+              class="button is-danger is-light"
+              href="/todos/<%= todo.id %>/remove"
+            >
+              Odstranit
+            </a>
+            <a class="button is-light" href="/"
+              >Zpět na seznam</a
+            >
+          </div>
+
+          <hr />
+
+          <form
+            method="post"
+            action="/todos/<%= todo.id %>/rename"
+          >
+            <div class="field">
+              <label class="label">Přejmenovat úkol</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="text"
+                  name="title"
+                  value="<%= todo.title %>"
+                  required
+                />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Priorita</label>
+              <div class="control">
+                <div class="select">
+                  <select name="priority">
+                    <option value="spinkej" <%= todo.priority === 'spinkej' ? 'selected' : '' %>>Spinkej</option>
+                    <option value="cajk" <%= todo.priority === 'cajk' ? 'selected' : '' %>>Cajk</option>
+                    <option value="hoří ti koudel" <%= todo.priority === 'hoří ti koudel' ? 'selected' : '' %>>Hoří ti koudel</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button class="button is-primary" type="submit">
+              Uložit změny
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
   </body>
 </html>

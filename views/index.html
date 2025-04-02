@@ -1,37 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Document</title>
+    <title>ÚKOLNÍČEK</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
   </head>
   <body>
-    <h1><%= title.toUpperCase() %></h1>
+    <section class="section">
+      <div class="container">
+        <h1 class="title has-text-centered">
+          <%= title.toUpperCase() %>
+        </h1>
 
-    <ul>
-      <% for (const todo of todos) { %>
-      <li>
-        <a href="/todos/<%= todo.id %>">
-          <%= todo.title %>
-        </a>
-        - <% if (todo.done) { %>
-        <a href="/todos/<%= todo.id %>/toggle">dokončeno</a>
-        <a href="/todos/<%= todo.id %>/remove">odebrat</a>
-        <% } else { %>
-        <a href="/todos/<%= todo.id %>/toggle">
-          nedokončeno
-        </a>
-        <% } %>
-      </li>
-      <% } %>
-    </ul>
+        <div class="box">
+          <ul>
+            <% for (const todo of todos) { %>
+            <li class="mb-3">
+              <div class="level">
+                <div class="level-left">
+                  <strong>
+                    <a href="/todos/<%= todo.id %>"
+                      ><%= todo.title %></a
+                    >
+                  </strong>
+                  <span
+                    class="tag ml-2 <%= todo.priority === 'hoří ti koudel' ? 'is-danger' : todo.priority === 'spinkej' ? 'is-info' : 'is-warning' %>"
+                  >
+                    <%= todo.priority %>
+                  </span>
+                </div>
+                <div class="level-right">
+                  <% if (todo.done) { %>
+                  <a
+                    class="button is-success is-light is-small mr-2"
+                    href="/todos/<%= todo.id %>/toggle"
+                  >
+                    Dokončeno
+                  </a>
+                  <a
+                    class="button is-danger is-light is-small"
+                    href="/todos/<%= todo.id %>/remove"
+                  >
+                    Odebrat
+                  </a>
+                  <% } else { %>
+                  <a
+                    class="button is-warning is-light is-small"
+                    href="/todos/<%= todo.id %>/toggle"
+                  >
+                    Nedokončeno
+                  </a>
+                  <% } %>
+                </div>
+              </div>
+            </li>
+            <% } %>
+          </ul>
+        </div>
 
-    <form method="post" action="/todos">
-      <input name="title" />
-      <button type="submit">Přidat todo</button>
-    </form>
+        <form method="post" action="/todos">
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input
+                class="input"
+                name="title"
+                placeholder="Zadej nový úkol..."
+                required
+              />
+            </div>
+            <div class="control">
+              <div class="select">
+                <select name="priority" required>
+                  <option value="spinkej">Spinkej</option>
+                  <option value="cajk" selected>
+                    Cajk
+                  </option>
+                  <option value="hoří ti koudel">
+                    Hoří ti koudel
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="control">
+              <button
+                class="button is-primary"
+                type="submit"
+              >
+                Přidat todo
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
   </body>
 </html>
