@@ -1,0 +1,12 @@
+<script>
+  const ws = new WebSocket("ws://localhost:3000/ws")
+  ws.addEventListener("message", (evt) => {
+    const { type, html } = JSON.parse(evt.data)
+
+    if (type !== "todo") {
+      const el = document.getElementById("todo")
+    }
+
+    el.innerHTML = html
+  })
+</script>
