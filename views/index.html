@@ -1,72 +1,34 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>ÚKOLNÍČEK</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
-    />
+    <title>Document</title>
   </head>
   <body>
-    <section class="section">
-      <div class="container">
-        <h1 class="title has-text-centered">
-          <%= title.toUpperCase() %>
-        </h1>
+    <h1><%= title.toUpperCase() %></h1>
 
-        <div id="todos"><% - include('_todos.html') %></div>
+    <div id="todos"><%- include('_todos.html') %></div>
 
-        <form method="post" action="/todos">
-          <div class="field has-addons">
-            <div class="control is-expanded">
-              <input
-                class="input"
-                name="title"
-                placeholder="Zadej nový úkol..."
-                required
-              />
-            </div>
-            <div class="control">
-              <div class="select">
-                <select name="priority" required>
-                  <option value="spinkej">Spinkej</option>
-                  <option value="cajk" selected>
-                    Cajk
-                  </option>
-                  <option value="hoří ti koudel">
-                    Hoří ti koudel
-                  </option>
-                </select>
-              </div>
-            </div>
-            <div class="control">
-              <button
-                class="button is-primary"
-                type="submit"
-              >
-                Přidat todo
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </section>
+    <form method="post" action="/todos">
+      <input name="title" />
+      <button type="submit">Přidat todo</button>
+    </form>
 
     <script>
       const ws = new WebSocket("ws://localhost:3000/ws")
+
       ws.addEventListener("message", (evt) => {
         const { type, html } = JSON.parse(evt.data)
 
-        if (type !== "todo") {
+        if (type === "todos") {
           const el = document.getElementById("todos")
-        }
 
-        el.innerHTML = html
+          el.innerHTML = html
+        }
       })
     </script>
   </body>
