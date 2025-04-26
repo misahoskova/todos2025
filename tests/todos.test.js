@@ -35,10 +35,13 @@ test("getTodoById returns correct todo", async (t) => {
 })
 
 test("getAllTodos returns all todos", async (t) => {
-  await db.insert(todosTable).values([
-    { title: "todo 1", done: false },
-    { title: "todo 2", done: true },
-  ])
+  await db
+    .insert(todosTable)
+    .values([
+      { title: "todo 1", done: false },
+      { title: "todo 2", done: true },
+    ])
+    .returning()
 
   const todos = await getAllTodos()
   console.log("Todos in table:", todos)
@@ -60,13 +63,13 @@ test("updateTodo updates todo correctly", async (t) => {
   const id = inserted[0].id
 
   await updateTodo(id, {
-    title: "updatované todo",
+    title: "updatovane todo",
     done: true,
   })
 
   const updatedTodo = await getTodoById(id)
 
-  t.is(updatedTodo.title, "updatované todo")
+  t.is(updatedTodo.title, "updatovane todo")
   t.true(updatedTodo.done)
 })
 
