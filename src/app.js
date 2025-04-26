@@ -25,7 +25,7 @@ app.use(logger())
 app.use(serveStatic({ root: "public" }))
 
 app.get("/", async (c) => {
-  const todos = await db.select().from(todosTable).all()
+  const todos = await getAllTodos()
 
   const index = await renderFile("views/index.html", {
     title: "My todo app",
@@ -66,18 +66,14 @@ app.post("/todos/:id", async (c) => {
   const id = Number(c.req.param("id"))
 
   const todo = await getTodoById(id)
-
   if (!todo) return c.notFound()
 
   const form = await c.req.formData()
 
-  await db
-    .update(todosTable)
-    .set({
-      title: form.get("title"),
-      priority: form.get("priority"),
-    })
-    .where(eq(todosTable.id, id))
+  await updateTodo(id, {
+    title: form.get("title"),
+    priority: form.get("priority"),
+  })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -89,13 +85,11 @@ app.get("/todos/:id/toggle", async (c) => {
   const id = Number(c.req.param("id"))
 
   const todo = await getTodoById(id)
-
   if (!todo) return c.notFound()
 
-  await db
-    .update(todosTable)
-    .set({ done: !todo.done })
-    .where(eq(todosTable.id, id))
+  await updateTodo(id, {
+    done: !todo.done,
+  })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -107,10 +101,9 @@ app.get("/todos/:id/remove", async (c) => {
   const id = Number(c.req.param("id"))
 
   const todo = await getTodoById(id)
-
   if (!todo) return c.notFound()
 
-  await db.delete(todosTable).where(eq(todosTable.id, id))
+  await deleteTodo(id)
 
   sendTodosToAllConnections()
   sendTodoDeletedToAllConnections(id)
@@ -124,20 +117,14 @@ const connections = new Set()
 app.get(
   "/ws",
   upgradeWebSocket((c) => {
-    console.log(c.req.path)
-
     return {
       onOpen: (ev, ws) => {
         connections.add(ws)
-        console.log("onOpen")
       },
       onClose: (evt, ws) => {
         connections.delete(ws)
-        console.log("onClose")
       },
-      onMessage: (evt, ws) => {
-        console.log("onMessage", evt.data)
-      },
+      onMessage: (evt, ws) => {},
     }
   })
 )
@@ -152,8 +139,24 @@ export const getTodoById = async (id) => {
   return todo
 }
 
-const sendTodosToAllConnections = async () => {
+export const getAllTodos = async () => {
   const todos = await db.select().from(todosTable).all()
+  return todos
+}
+
+export const updateTodo = async (id, values) => {
+  await db
+    .update(todosTable)
+    .set(values)
+    .where(eq(todosTable.id, id))
+}
+
+export const deleteTodo = async (id) => {
+  await db.delete(todosTable).where(eq(todosTable.id, id))
+}
+
+const sendTodosToAllConnections = async () => {
+  const todos = await getAllTodos()
 
   const rendered = await renderFile("views/_todos.html", {
     todos,

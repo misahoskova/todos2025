@@ -1,1 +1,1 @@
-ALTER TABLE `todos` ADD `priority` text DEFAULT 'cajk' NOT NULL;
+ALTER TABLE `todos` ADD `priority` text DEFAULT 'nízká' NOT NULL;

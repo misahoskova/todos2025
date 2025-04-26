@@ -9,8 +9,8 @@ export const todosTable = sqliteTable("todos", {
   title: text().notNull(),
   done: int({ mode: "boolean" }).notNull(),
   priority: text("priority", {
-    enum: ["spinkej", "cajk", "hoří ti koudel"],
+    enum: ["nízká", "střední", "vysoká"],
   })
     .notNull()
-    .default("cajk"),
+    .default("nízká"),
 })
