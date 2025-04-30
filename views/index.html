@@ -14,7 +14,8 @@
     <div id="todos"><%- include('_todos.html') %></div>
 
     <form method="post" action="/todos">
-      <input name="title" />
+      <label for="title">Název todo</label>
+      <input id="title" name="title" />
       <button type="submit">Přidat todo</button>
     </form>
 

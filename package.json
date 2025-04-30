@@ -8,7 +8,8 @@
     "dev": "node --watch index.js",
     "test": "ava",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "e2e": "playwright test --ui"
   },
   "author": "Adam Jedlicka",
   "license": "MIT",
@@ -21,5 +22,9 @@
     "drizzle-orm": "^0.41.0",
     "ejs": "^3.1.10",
     "hono": "^4.7.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.3"
   }
 }
