@@ -18,23 +18,26 @@ test.beforeEach("delete table values", async () => {
   await db.delete(todosTable)
 })
 
-test("getTodoById returns correct todo", async (t) => {
-  const inserted = await db
-    .insert(todosTable)
-    .values({
-      title: "testovaci todo pro test 1",
-      done: false,
-    })
-    .returning()
+test.serial(
+  "getTodoById returns correct todo",
+  async (t) => {
+    const inserted = await db
+      .insert(todosTable)
+      .values({
+        title: "testovaci todo pro test 1",
+        done: false,
+      })
+      .returning()
 
-  const id = inserted[0].id
+    const id = inserted[0].id
 
-  const todo = await getTodoById(id)
+    const todo = await getTodoById(id)
 
-  t.is(todo.title, "testovaci todo pro test 1")
-})
+    t.is(todo.title, "testovaci todo pro test 1")
+  }
+)
 
-test("getAllTodos returns all todos", async (t) => {
+test.serial("getAllTodos returns all todos", async (t) => {
   await db
     .insert(todosTable)
     .values([
@@ -51,42 +54,48 @@ test("getAllTodos returns all todos", async (t) => {
   t.is(todos[1].title, "todo 2")
 })
 
-test("updateTodo updates todo correctly", async (t) => {
-  const inserted = await db
-    .insert(todosTable)
-    .values({
-      title: "testovaci todo pro update",
-      done: false,
+test.serial(
+  "updateTodo updates todo correctly",
+  async (t) => {
+    const inserted = await db
+      .insert(todosTable)
+      .values({
+        title: "testovaci todo pro update",
+        done: false,
+      })
+      .returning()
+
+    const id = inserted[0].id
+
+    await updateTodo(id, {
+      title: "updatovane todo",
+      done: true,
     })
-    .returning()
 
-  const id = inserted[0].id
+    const updatedTodo = await getTodoById(id)
 
-  await updateTodo(id, {
-    title: "updatovane todo",
-    done: true,
-  })
+    t.is(updatedTodo.title, "updatovane todo")
+    t.true(updatedTodo.done)
+  }
+)
 
-  const updatedTodo = await getTodoById(id)
+test.serial(
+  "deleteTodo deletes todo correctly",
+  async (t) => {
+    const inserted = await db
+      .insert(todosTable)
+      .values({
+        title: "testovaci todo pro delete",
+        done: false,
+      })
+      .returning()
 
-  t.is(updatedTodo.title, "updatovane todo")
-  t.true(updatedTodo.done)
-})
+    const id = inserted[0].id
 
-test("deleteTodo deletes todo correctly", async (t) => {
-  const inserted = await db
-    .insert(todosTable)
-    .values({
-      title: "testovaci todo pro delete",
-      done: false,
-    })
-    .returning()
+    await deleteTodo(id)
 
-  const id = inserted[0].id
+    const deletedTodo = await getTodoById(id)
 
-  await deleteTodo(id)
-
-  const deletedTodo = await getTodoById(id)
-
-  t.is(deletedTodo, undefined)
-})
+    t.is(deletedTodo, undefined)
+  }
+)
