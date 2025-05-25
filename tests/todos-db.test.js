@@ -1,101 +1,69 @@
 import test from "ava"
-import { migrate } from "drizzle-orm/libsql/migrator"
 import {
+  createTodo,
   db,
-  getTodoById,
-  getAllTodos,
-  updateTodo,
   deleteTodo,
-} from "../src/app.js"
+  getAllTodos,
+  getTodoById,
+  updateTodo,
+} from "../src/db.js"
 import { todosTable } from "../src/schema.js"
 
-test.before("run migrations", async () => {
-  await migrate(db, { migrationsFolder: "drizzle" })
+test.beforeEach("delete todos", async () => {
   await db.delete(todosTable)
 })
 
-test.beforeEach("delete table values", async () => {
-  await db.delete(todosTable)
-})
-
-test.serial(
-  "getTodoById returns correct todo",
-  async (t) => {
-    const inserted = await db
-      .insert(todosTable)
-      .values({
-        title: "testovaci todo pro test 1",
-        done: false,
-      })
-      .returning()
-
-    const id = inserted[0].id
-
-    const todo = await getTodoById(id)
-
-    t.is(todo.title, "testovaci todo pro test 1")
-  }
-)
-
-test.serial("getAllTodos returns all todos", async (t) => {
+test.serial("getTodoById returns id", async (t) => {
   await db
     .insert(todosTable)
-    .values([
-      { title: "todo 1", done: false },
-      { title: "todo 2", done: true },
-    ])
-    .returning()
+    .values({ id: 1, title: "testovaci todo", done: false })
 
-  const todos = await getAllTodos()
-  console.log("Todos in table:", todos)
+  const todo = await getTodoById(1)
 
-  t.is(todos.length, 2)
-  t.is(todos[0].title, "todo 1")
-  t.is(todos[1].title, "todo 2")
+  t.is(todo.title, "testovaci todo")
 })
 
-test.serial(
-  "updateTodo updates todo correctly",
-  async (t) => {
-    const inserted = await db
-      .insert(todosTable)
-      .values({
-        title: "testovaci todo pro update",
-        done: false,
-      })
-      .returning()
+test.serial("getAllTodos returns all todos", async (t) => {
+  await db.insert(todosTable).values([
+    { title: "testovaci todo 1", done: false },
+    { title: "testovaci todo 2", done: false },
+    { title: "testovaci todo 3", done: false },
+  ])
 
-    const id = inserted[0].id
+  const todos = await getAllTodos()
 
-    await updateTodo(id, {
-      title: "updatovane todo",
-      done: true,
-    })
+  t.is(todos.length, 3)
+})
 
-    const updatedTodo = await getTodoById(id)
+test.serial("createTodo creates todo", async (t) => {
+  await createTodo({ title: "created todo", done: false })
 
-    t.is(updatedTodo.title, "updatovane todo")
-    t.true(updatedTodo.done)
-  }
-)
+  const todos = await getAllTodos()
 
-test.serial(
-  "deleteTodo deletes todo correctly",
-  async (t) => {
-    const inserted = await db
-      .insert(todosTable)
-      .values({
-        title: "testovaci todo pro delete",
-        done: false,
-      })
-      .returning()
+  t.is(todos[0].title, "created todo")
+})
 
-    const id = inserted[0].id
+test.serial("updateTodo updates todo", async (t) => {
+  await createTodo({ id: 1, title: "a", done: false })
 
-    await deleteTodo(id)
+  await updateTodo(1, { title: "b", done: true })
 
-    const deletedTodo = await getTodoById(id)
+  const todo = await getTodoById(1)
 
-    t.is(deletedTodo, undefined)
-  }
-)
+  t.is(todo.title, "b")
+  t.is(todo.done, true)
+})
+
+test.serial("deleteTodo deletes todo", async (t) => {
+  await createTodo({ title: "a", done: false })
+
+  const todosBefore = await getAllTodos()
+
+  t.is(todosBefore.length, 1)
+
+  await deleteTodo(todosBefore[0].id)
+
+  const todosAfter = await getAllTodos()
+
+  t.is(todosAfter.length, 0)
+})

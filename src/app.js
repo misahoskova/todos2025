@@ -2,27 +2,35 @@ import { Hono } from "hono"
 import { logger } from "hono/logger"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { renderFile } from "ejs"
-import { drizzle } from "drizzle-orm/libsql"
-import { todosTable } from "./schema.js"
-import { eq } from "drizzle-orm"
 import { createNodeWebSocket } from "@hono/node-ws"
 import { WSContext } from "hono/ws"
-
-export const db = drizzle({
-  connection:
-    process.env.NODE_ENV === "test"
-      ? "file::memory:"
-      : "file:db.sqlite",
-  logger: process.env.NODE_ENV !== "test",
-})
+import {
+  createTodo,
+  deleteTodo,
+  getAllTodos,
+  getTodoById,
+  getUserByToken,
+  updateTodo,
+} from "./db.js"
+import { usersRouter } from "./users.js"
+import { getCookie } from "hono/cookie"
 
 export const app = new Hono()
 
 export const { injectWebSocket, upgradeWebSocket } =
   createNodeWebSocket({ app })
 
-app.use(logger())
+// app.use(logger())
 app.use(serveStatic({ root: "public" }))
+
+app.use(async (c, next) => {
+  const token = getCookie(c, "token")
+  const user = await getUserByToken(token)
+  c.set("user", user)
+  await next()
+})
+
+app.route("/", usersRouter)
 
 app.get("/", async (c) => {
   const todos = await getAllTodos()
@@ -30,6 +38,7 @@ app.get("/", async (c) => {
   const index = await renderFile("views/index.html", {
     title: "My todo app",
     todos,
+    user: c.get("user"),
   })
 
   return c.html(index)
@@ -38,9 +47,10 @@ app.get("/", async (c) => {
 app.post("/todos", async (c) => {
   const form = await c.req.formData()
 
-  await db.insert(todosTable).values({
+  await createTodo({
     title: form.get("title"),
     done: false,
+    user: c.get("user"),
   })
 
   sendTodosToAllConnections()
@@ -66,6 +76,7 @@ app.post("/todos/:id", async (c) => {
   const id = Number(c.req.param("id"))
 
   const todo = await getTodoById(id)
+
   if (!todo) return c.notFound()
 
   const form = await c.req.formData()
@@ -85,11 +96,10 @@ app.get("/todos/:id/toggle", async (c) => {
   const id = Number(c.req.param("id"))
 
   const todo = await getTodoById(id)
+
   if (!todo) return c.notFound()
 
-  await updateTodo(id, {
-    done: !todo.done,
-  })
+  await updateTodo(id, { done: !todo.done })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -101,6 +111,7 @@ app.get("/todos/:id/remove", async (c) => {
   const id = Number(c.req.param("id"))
 
   const todo = await getTodoById(id)
+
   if (!todo) return c.notFound()
 
   await deleteTodo(id)
@@ -117,6 +128,8 @@ const connections = new Set()
 app.get(
   "/ws",
   upgradeWebSocket((c) => {
+    console.log(c.req.path)
+
     return {
       onOpen: (ev, ws) => {
         connections.add(ws)
@@ -124,36 +137,9 @@ app.get(
       onClose: (evt, ws) => {
         connections.delete(ws)
       },
-      onMessage: (evt, ws) => {},
     }
   })
 )
-
-export const getTodoById = async (id) => {
-  const todo = await db
-    .select()
-    .from(todosTable)
-    .where(eq(todosTable.id, id))
-    .get()
-
-  return todo
-}
-
-export const getAllTodos = async () => {
-  const todos = await db.select().from(todosTable).all()
-  return todos
-}
-
-export const updateTodo = async (id, values) => {
-  await db
-    .update(todosTable)
-    .set(values)
-    .where(eq(todosTable.id, id))
-}
-
-export const deleteTodo = async (id) => {
-  await db.delete(todosTable).where(eq(todosTable.id, id))
-}
 
 const sendTodosToAllConnections = async () => {
   const todos = await getAllTodos()

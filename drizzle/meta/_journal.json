@@ -22,6 +22,34 @@
       "when": 1743602596777,
       "tag": "0002_flimsy_molecule_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1746634820399,
+      "tag": "0002_harsh_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1746635752671,
+      "tag": "0003_polite_the_twelve",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1746636141014,
+      "tag": "0004_glossy_ares",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1747035084970,
+      "tag": "0005_dry_dark_beast",
+      "breakpoints": true
     }
   ]
 }

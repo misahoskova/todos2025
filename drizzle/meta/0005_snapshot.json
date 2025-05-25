@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "334ac014-615a-467e-b0c4-311b01e1df79",
-  "prevId": "07874440-bbcb-463b-a5e4-5fd10d11810c",
+  "id": "69818b35-ac0f-4391-9ac9-8cca36c653bf",
+  "prevId": "c97ac433-e839-4ecd-a4b0-d3dec46a3b69",
   "tables": {
     "todos": {
       "name": "todos",
@@ -45,7 +45,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "todos_userId_users_id_fk": {
+          "name": "todos_userId_users_id_fk",
+          "tableFrom": "todos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -74,6 +88,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "salt": {
+          "name": "salt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "token": {
           "name": "token",
           "type": "text",
@@ -82,7 +103,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "columns": [
+            "username"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

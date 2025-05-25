@@ -6,11 +6,13 @@ test("index page has title", async ({ page }) => {
   await expect(page.getByText("MY TODO APP")).toBeDefined()
 })
 
-test("form on index page", async ({ page }) => {
+test("form on index page creates new todos", async ({
+  page,
+}) => {
   await page.goto("/")
 
-  await page.getByLabel("Název todo").fill("Test todo")
+  await page.getByLabel("Název todo").fill("E2E todo")
   await page.getByText("Přidat todo").click()
 
-  await expect(page.getByText("Test E2E")).toBeDefined()
+  await expect(page.getByText("E2E todo")).toBeDefined()
 })

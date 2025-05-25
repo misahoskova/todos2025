@@ -9,7 +9,15 @@
     <title>Document</title>
   </head>
   <body>
+    <% if (user) { %>
+    <h1><%= user.username %></h1>
+    <% } else { %>
+    <a href="/register">Registrovat se</a>
+    <a href="/login">Přihlásit se</a>
+    <% } %>
     <h1><%= title.toUpperCase() %></h1>
+
+    <hr />
 
     <div id="todos"><%- include('_todos.html') %></div>
 

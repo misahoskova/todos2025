@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "334ac014-615a-467e-b0c4-311b01e1df79",
-  "prevId": "07874440-bbcb-463b-a5e4-5fd10d11810c",
+  "id": "c97ac433-e839-4ecd-a4b0-d3dec46a3b69",
+  "prevId": "7d549cc1-103f-485f-bd00-80ba450345d2",
   "tables": {
     "todos": {
       "name": "todos",
@@ -74,6 +74,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "salt": {
+          "name": "salt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "token": {
           "name": "token",
           "type": "text",
@@ -82,7 +89,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "columns": [
+            "username"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

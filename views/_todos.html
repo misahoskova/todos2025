@@ -8,6 +8,9 @@
     <% } else { %>
     <a href="/todos/<%= todo.id %>/toggle"> nedokončeno </a>
     <% } %> - <%= todo.priority %>
+    <% if (todo.user) { %>
+      (<%= todo.user.username %>)
+    <% } %>
   </li>
   <% } %>
 </ul>

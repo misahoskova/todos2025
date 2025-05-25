@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "334ac014-615a-467e-b0c4-311b01e1df79",
-  "prevId": "07874440-bbcb-463b-a5e4-5fd10d11810c",
+  "id": "7d549cc1-103f-485f-bd00-80ba450345d2",
+  "prevId": "334ac014-615a-467e-b0c4-311b01e1df79",
   "tables": {
     "todos": {
       "name": "todos",
@@ -69,6 +69,13 @@
         },
         "hashedPassword": {
           "name": "hashedPassword",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "salt": {
+          "name": "salt",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
